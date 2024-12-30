@@ -34,11 +34,13 @@ func (job *TaxIncludedPriceJob) LoadData() error {
 }
 
 // to derive the prices that includes the tax
-func (job *TaxIncludedPriceJob) Process(doneChan chan bool) {
+func (job *TaxIncludedPriceJob) Process(doneChan chan bool, errorChan chan error) {
 	err := job.LoadData()
 
 	if err != nil {
 		// return err
+		errorChan <- err
+		return
 	}
 	result := make(map[string]string)
 	for _, price := range job.InputPrices {
