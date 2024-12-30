@@ -34,11 +34,11 @@ func (job *TaxIncludedPriceJob) LoadData() error {
 }
 
 // to derive the prices that includes the tax
-func (job *TaxIncludedPriceJob) Process() error {
+func (job *TaxIncludedPriceJob) Process(doneChan chan bool) {
 	err := job.LoadData()
 
 	if err != nil {
-		return err
+		// return err
 	}
 	result := make(map[string]string)
 	for _, price := range job.InputPrices {
@@ -46,7 +46,8 @@ func (job *TaxIncludedPriceJob) Process() error {
 		result[fmt.Sprintf("%.2f", price)] = fmt.Sprintf("%.2f", taxIncludedPrice)
 	}
 	job.TaxIncludedPrices = result
-	return job.IOManager.WriteResult(job)
+	job.IOManager.WriteResult(job)
+	doneChan <- true
 }
 
 func NewTaxIncudedPriceJob(iom iomanager.IOManager, taxRate float64) *TaxIncludedPriceJob {
